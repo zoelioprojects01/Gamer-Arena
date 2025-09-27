@@ -127,7 +127,7 @@
         setLogLevel('Debug');
 
         // Global variables provided by the Canvas environment (MANDATORY USE)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; // ADDED fallback 'default-app-id'
         // HARDCODED CONFIGURATION: Using the keys you provided for debugging connection issues.
         const firebaseConfig = {
             apiKey: "AIzaSyD7Ln4FWjEOs5K-ggRVsvVRR3XqVMiWRs4",
