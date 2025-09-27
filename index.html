@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Website - Login</title>
+    <!-- Load Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Dark background */
+            color: #c9d1d9; /* Light text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .form-card {
+            max-width: 400px;
+            width: 100%;
+            background-color: #161b22; /* Slightly lighter dark background for card */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+        .input-field {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="auth-container" class="form-card p-6 md:p-8 rounded-xl border border-gray-700">
+        <h1 class="text-3xl font-bold mb-6 text-center text-green-400">Gamer Arena</h1>
+        <p class="text-center mb-6 text-gray-400">Sign in to view tournaments or register below.</p>
+
+        <!-- Dynamic Message Area (for errors/success) -->
+        <div id="message-box" class="hidden p-3 mb-4 rounded-lg text-sm transition-all duration-300"></div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="space-y-4">
+            <div>
+                <label for="login-email" class="block text-sm font-medium mb-1 text-gray-300">Email</label>
+                <input type="email" id="login-email" placeholder="example@email.com" required
+                       class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
+            </div>
+            <div>
+                <label for="login-password" class="block text-sm font-medium mb-1 text-gray-300">Password</label>
+                <input type="password" id="login-password" placeholder="••••••••" required
+                       class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
+            </div>
+            <button type="submit" id="login-button"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md shadow-green-900/50 flex items-center justify-center">
+                <span id="login-spinner" class="hidden animate-spin h-5 w-5 mr-3 border-2 border-white border-t-transparent rounded-full"></span>
+                Login
+            </button>
+        </form>
+
+        <p class="text-center text-sm mt-6 mb-4">
+            Don't have an account? 
+            <button id="toggle-signup" class="text-green-400 hover:text-green-300 font-medium">Create one now</button>
+        </p>
+        
+        <hr class="border-gray-700 mb-6">
+
+        <!-- Signup Form (Hidden by default) -->
+        <form id="signup-form" class="space-y-4 hidden">
+            <div>
+                <label for="signup-email" class="block text-sm font-medium mb-1 text-gray-300">Email (For Account)</label>
+                <input type="email" id="signup-email" placeholder="example@email.com" required
+                       class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
+            </div>
+            <div>
+                <label for="signup-mobile" class="block text-sm font-medium mb-1 text-gray-300">Mobile Number</label>
+                <input type="tel" id="signup-mobile" placeholder="Required for tournament contact" required pattern="[0-9]{10}"
+                       class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
+                <p class="text-xs text-gray-500 mt-1">10 digits required (e.g., 9876543210)</p>
+            </div>
+            <div>
+                <label for="signup-password" class="block text-sm font-medium mb-1 text-gray-300">Password (Min 6 chars)</label>
+                <input type="password" id="signup-password" placeholder="••••••••" required minlength="6"
+                       class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
+            </div>
+            
+            <!-- CAPTCHA Placeholder - Must use a service like Google reCAPTCHA in a real deployment -->
+            <div class="p-4 bg-gray-800 rounded-lg text-center text-sm border border-gray-700">
+                <!-- In a real site, integrate Google reCAPTCHA here -->
+                <p class="text-yellow-400">CAPTCHA Placeholder (Manual Check)</p>
+                <input type="checkbox" id="captcha-check" required class="mt-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-600 rounded">
+                <label for="captcha-check" class="ml-2">I am not a robot</label>
+            </div>
+            
+            <button type="submit" id="signup-button"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md shadow-blue-900/50 flex items-center justify-center">
+                <span id="signup-spinner" class="hidden animate-spin h-5 w-5 mr-3 border-2 border-white border-t-transparent rounded-full"></span>
+                Sign Up
+            </button>
+
+            <p class="text-center text-sm pt-4">
+                Already have an account? 
+                <button id="toggle-login" class="text-blue-400 hover:text-blue-300 font-medium">Log in</button>
+            </p>
+        </form>
+    </div>
+
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Setting Firebase log level to Debug for visibility
+        setLogLevel('Debug');
+
+        // Global variables provided by the Canvas environment (MANDATORY USE)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let app;
+        let auth;
+        let db;
+        let currentUserId = null;
+
+        /**
+         * Initializes Firebase and authenticates the user.
+         */
+        async function initializeAndAuthenticate() {
+            if (!firebaseConfig) {
+                console.error("Firebase config is missing. Cannot initialize Firebase.");
+                displayMessage("Configuration Error: Firebase settings are missing. Cannot run app.", 'bg-red-800 text-white');
+                return;
+            }
+
+            try {
+                // Initialize Firebase
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Authentication Logic
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        currentUserId = user.uid;
+                        console.log("User signed in. UID:", currentUserId);
+                        // Redirect to the dashboard if already logged in
+                        if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
+                            window.location.href = 'dashboard.html';
+                        }
+                    } else {
+                        currentUserId = null;
+                        console.log("User signed out or initial state. Attempting custom token or anonymous sign in.");
+                        try {
+                            if (initialAuthToken) {
+                                // 1. Use custom token for Canvas auth
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                // 2. Sign in anonymously if no token is available
+                                await signInAnonymously(auth);
+                            }
+                        } catch (e) {
+                            console.error("Authentication fallback failed:", e);
+                            displayMessage("Failed to connect to authentication service.", 'bg-red-800 text-white');
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error("Firebase Initialization Failed:", e);
+                displayMessage("Critical Error: Failed to initialize Firebase.", 'bg-red-800 text-white');
+            }
+        }
+
+
+        /**
+         * Handles user registration (Signup).
+         * @param {string} email - The user's email.
+         * @param {string} password - The user's password.
+         * @param {string} mobile - The user's mobile number.
+         */
+        async function handleSignup(email, password, mobile) {
+            const signupButton = document.getElementById('signup-button');
+            const signupSpinner = document.getElementById('signup-spinner');
+            
+            signupButton.disabled = true;
+            signupSpinner.classList.remove('hidden');
+
+            try {
+                // 1. Create user in Firebase Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                const userId = user.uid;
+
+                // 2. Store additional user data (mobile number) in Firestore
+                // Note: Storing private user data under /artifacts/{appId}/users/{userId}/...
+                const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile`, 'info');
+                await setDoc(userDocRef, {
+                    email: email,
+                    mobile: mobile,
+                    createdAt: new Date().toISOString()
+                });
+
+                displayMessage("Signup successful! Redirecting to dashboard...", 'bg-green-600 text-white');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error("Signup Error:", error.code, error.message);
+                let message = "Signup failed.";
+                if (error.code === 'auth/email-already-in-use') {
+                    message = "This email is already registered. Try logging in.";
+                } else if (error.code === 'auth/weak-password') {
+                    message = "Password should be at least 6 characters.";
+                }
+                displayMessage(`Error: ${message}`, 'bg-red-800 text-white');
+            } finally {
+                signupButton.disabled = false;
+                signupSpinner.classList.add('hidden');
+            }
+        }
+
+
+        /**
+         * Handles user login.
+         * @param {string} email - The user's email.
+         * @param {string} password - The user's password.
+         */
+        async function handleLogin(email, password) {
+            const loginButton = document.getElementById('login-button');
+            const loginSpinner = document.getElementById('login-spinner');
+            
+            loginButton.disabled = true;
+            loginSpinner.classList.remove('hidden');
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                displayMessage("Login successful! Redirecting to dashboard...", 'bg-green-600 text-white');
+                // Redirection is handled by the onAuthStateChanged listener, but we add a small delay for user experience
+                setTimeout(() => {
+                     // We don't actually need this timeout, as onAuthStateChanged handles the redirect, 
+                     // but it provides a smoother visual transition.
+                }, 500);
+
+            } catch (error) {
+                console.error("Login Error:", error.code, error.message);
+                let message = "Login failed. Check your email and password.";
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    message = "Invalid email or password.";
+                }
+                displayMessage(`Error: ${message}`, 'bg-red-800 text-white');
+            } finally {
+                loginButton.disabled = false;
+                loginSpinner.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Displays a temporary message in the message box.
+         * @param {string} text - The message text.
+         * @param {string} styleClass - Tailwind class for styling (e.g., 'bg-red-800 text-white').
+         */
+        function displayMessage(text, styleClass) {
+            const msgBox = document.getElementById('message-box');
+            msgBox.textContent = text;
+            msgBox.className = `p-3 mb-4 rounded-lg text-sm transition-all duration-300 ${styleClass}`;
+            msgBox.classList.remove('hidden');
+        }
+
+
+        // --- Event Listeners and Form Submission ---
+
+        window.onload = () => {
+            initializeAndAuthenticate();
+
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            const toggleSignup = document.getElementById('toggle-signup');
+            const toggleLogin = document.getElementById('toggle-login');
+
+            // Form Toggling
+            toggleSignup.addEventListener('click', () => {
+                loginForm.classList.add('hidden');
+                signupForm.classList.remove('hidden');
+            });
+            toggleLogin.addEventListener('click', () => {
+                signupForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            });
+
+            // Login Submission
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                displayMessage("", 'hidden'); // Clear previous message
+                handleLogin(email, password);
+            });
+
+            // Signup Submission
+            signupForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+                const mobile = document.getElementById('signup-mobile').value;
+                const captchaChecked = document.getElementById('captcha-check').checked;
+                
+                if (!captchaChecked) {
+                    displayMessage("Please check the 'I am not a robot' box.", 'bg-yellow-800 text-white');
+                    return;
+                }
+
+                displayMessage("", 'hidden'); // Clear previous message
+                handleSignup(email, password, mobile);
+            });
+        };
+    </script>
+</body>
+</html>

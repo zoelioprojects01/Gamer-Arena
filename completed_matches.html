@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completed Matches - Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Setup for Inter font and dark mode aesthetics */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: #161b22;
+        }
+        .match-card {
+            background-color: #161b22;
+            transition: transform 0.2s;
+            border-top: 5px solid #6b7280; /* Neutral gray border for results */
+        }
+        .match-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.05);
+        }
+        .stat-badge {
+            padding: 4px 8px;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .ff-theme { border-color: #10b981; }
+        .bgmi-theme { border-color: #3b82f6; }
+        .winner-highlight {
+            background-color: #f59e0b;
+            color: #1f2937;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header shadow-lg p-4 md:p-6 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-extrabold text-gray-200">Match Results</h1>
+            <nav class="flex space-x-4 items-center">
+                <a href="dashboard.html" class="text-gray-400 hover:text-gray-100 transition text-sm md:text-base">Dashboard</a>
+                <a href="tournaments_ff.html" class="text-gray-400 hover:text-gray-100 transition text-sm md:text-base">Free Fire</a>
+                <a href="tournaments_bgmi.html" class="text-gray-400 hover:text-gray-100 transition text-sm md:text-base">BGMI</a>
+                <button id="logout-button" class="bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded-lg transition duration-200 text-xs md:text-sm">Logout</button>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Loading State Indicator -->
+    <div id="loading-state" class="text-center mt-12">
+        <div class="animate-spin h-8 w-8 border-4 border-gray-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p>Verifying user access...</p>
+    </div>
+
+    <!-- Main Content Area (Hidden until authenticated) -->
+    <main id="content" class="max-w-6xl mx-auto p-4 md:p-8 hidden">
+        <h2 class="text-4xl font-bold mb-4 text-center text-white pt-6">Completed Tournament Results</h2>
+        <p class="text-center text-gray-400 mb-8">View the champions and top performers from our past events.</p>
+        
+        <!-- Instruction Note for Organizers -->
+        <div class="update-note p-4 rounded-xl mb-10 border border-gray-700/50">
+            <h3 class="font-bold text-lg mb-2 text-yellow-300">📢 Organizer Note: Updating Results</h3>
+            <p class="text-sm text-gray-200">
+                To update the completed matches, you must <strong class="text-yellow-100">manually edit this `completed_matches.html` file</strong> 
+                in your GitHub repository. Copy and edit one of the match-card divs below to add a new result.
+            </p>
+        </div>
+
+        <!-- Match Results List Container -->
+        <div class="space-y-10" id="match-results-list">
+            
+            <!-- Match Card 1: Free Fire Squad Final -->
+            <div class="match-card p-6 rounded-xl shadow-lg flex flex-col ff-theme">
+                <div class="flex justify-between items-center mb-4 border-b pb-3 border-gray-700">
+                    <h3 class="text-2xl font-bold text-white">FF Squad Blitzkrieg Final</h3>
+                    <span class="stat-badge bg-green-700 text-green-100">Free Fire | SQUAD</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Key Stats -->
+                    <div class="space-y-3">
+                        <p class="text-gray-400"><span class="font-semibold text-gray-200">Date:</span> 20 Sept 2025</p>
+                        <p class="text-gray-400"><span class="font-semibold text-gray-200">Total Players:</span> 60 (15 Squads)</p>
+                        <p class="text-gray-400"><span class="font-semibold text-gray-200">Match ID:</span> FF-2025-09-20</p>
+                    </div>
+                    
+                    <!-- Winner/MVP -->
+                    <div class="space-y-3">
+                        <p class="text-lg text-gray-200 font-semibold flex items-center">
+                            <span class="mr-2">🏆 Winner:</span>
+                            <span class="winner-highlight px-3 py-1 rounded-lg">Team Vipers</span>
+                        </p>
+                        <p class="text-lg text-gray-200 font-semibold">
+                            🌟 MVP: <span class="text-yellow-400">VPR | Ghost</span>
+                        </p>
+                        <p class="text-lg text-gray-200 font-semibold">
+                            🔪 Most Kills: <span class="text-red-500">VPR | Hunter (14 Kills)</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Match Card 2: BGMI Solo Championship -->
+            <div class="match-card p-6 rounded-xl shadow-lg flex flex-col bgmi-theme">
+                <div class="flex justify-between items-center mb-4 border-b pb-3 border-gray-700">
+                    <h3 class="text-2xl font-bold text-white">BGMI Solo Conqueror Series</h3>
+                    <span class="stat-badge bg-blue-700 text-blue-100">BGMI | SOLO</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Key Stats -->
+                    <div class="space-y-3">
+                        <p class="text-gray-400"><span class="font-semibold text-gray-200">Date:</span> 15 Sept 2025</p>
+                        <p class="text-gray-400"><span class="font-semibold text-gray-200">Total Players:</span> 100</p>
+                        <p class="text-gray-400"><span class="font-semibold text-gray-200">Match ID:</span> BGMI-2025-09-15</p>
+                    </div>
+                    
+                    <!-- Winner/MVP -->
+                    <div class="space-y-3">
+                        <p class="text-lg text-gray-200 font-semibold flex items-center">
+                            <span class="mr-2">🏆 Winner:</span>
+                            <span class="winner-highlight px-3 py-1 rounded-lg">SoloKing_X</span>
+                        </p>
+                        <p class="text-lg text-gray-200 font-semibold">
+                            🌟 MVP: <span class="text-yellow-400">SoloKing_X</span>
+                        </p>
+                        <p class="text-lg text-gray-200 font-semibold">
+                            🔪 Most Kills: <span class="text-red-500">SniperPro (11 Kills)</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Match Card 3: Free Fire Duo Fun Match -->
+            <div class="match-card p-6 rounded-xl shadow-lg flex flex-col ff-theme">
+                <div class="flex justify-between items-center mb-4 border-b pb-3 border-gray-700">
+                    <h3 class="text-2xl font-bold text-white">FF Duo Clash</h3>
+                    <span class="stat-badge bg-green-700 text-green-100">Free Fire | DUO</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Key Stats -->
+                    <div class="space-y-3">
+                        <p class="text-gray-400"><span class="font-semibold text-gray-200">Date:</span> 10 Sept 2025</p>
+                        <p class="text-gray-400"><span class="font-semibold text-gray-200">Total Players:</span> 50 (25 Duos)</p>
+                        <p class="text-gray-400"><span class="font-semibold text-gray-200">Match ID:</span> FF-2025-09-10</p>
+                    </div>
+                    
+                    <!-- Winner/MVP -->
+                    <div class="space-y-3">
+                        <p class="text-lg text-gray-200 font-semibold flex items-center">
+                            <span class="mr-2">🏆 Winner:</span>
+                            <span class="winner-highlight px-3 py-1 rounded-lg">DuoDestroyers</span>
+                        </p>
+                        <p class="text-lg text-gray-200 font-semibold">
+                            🌟 MVP: <span class="text-yellow-400">DD | Reaper</span>
+                        </p>
+                        <p class="text-lg text-gray-200 font-semibold">
+                            🔪 Most Kills: <span class="text-red-500">DD | Reaper (16 Kills)</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Firebase SDK Imports and Logic for Authentication Check -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Setting Firebase log level to Debug
+        setLogLevel('Debug');
+
+        // Global variables provided by the Canvas environment (MANDATORY USE)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        
+        let app;
+        let auth;
+        let db;
+        
+        const loadingState = document.getElementById('loading-state');
+        const content = document.getElementById('content');
+        const logoutButton = document.getElementById('logout-button');
+
+        /**
+         * Initializes Firebase and checks authentication state.
+         */
+        async function initializeAndCheckAuth() {
+            if (!firebaseConfig) {
+                console.error("Firebase config is missing. Cannot initialize Firebase.");
+                loadingState.innerHTML = '<p class="text-red-500">Error: Firebase configuration is missing.</p>';
+                return;
+            }
+
+            try {
+                // Initialize Firebase
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Initial Firebase sign-in check
+                await new Promise((resolve) => {
+                    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+                        unsubscribe(); // Stop listening after the first check
+
+                        if (user) {
+                            console.log("User signed in. Allowing access to Completed Matches.");
+                            loadingState.classList.add('hidden');
+                            content.classList.remove('hidden');
+                        } else {
+                            // If no user is found, attempt anonymous sign-in (if initial token is missing)
+                            try {
+                                if (typeof __initial_auth_token !== 'undefined') {
+                                    await signInWithCustomToken(auth, __initial_auth_token);
+                                } else {
+                                    await signInAnonymously(auth);
+                                }
+                                // If sign-in is successful, onAuthStateChanged will be triggered again
+                            } catch (error) {
+                                // If sign-in fails, redirect to index
+                                console.log("User not authenticated. Redirecting to login page.", error);
+                                window.location.href = 'index.html';
+                            }
+                        }
+                        resolve();
+                    });
+                });
+                
+                // Set up the listener again for real-time changes
+                onAuthStateChanged(auth, (user) => {
+                    if (!user && !content.classList.contains('hidden')) {
+                         // Redirect only if they were viewing content and then logged out
+                         window.location.href = 'index.html';
+                    }
+                });
+
+
+                // Handle Logout
+                logoutButton.addEventListener('click', async () => {
+                    try {
+                        console.log("Attempting to sign out user...");
+                        await signOut(auth);
+                    } catch (error) {
+                        console.error("Logout Error:", error);
+                    }
+                });
+
+            } catch (e) {
+                console.error("Firebase Initialization Failed:", e);
+                loadingState.innerHTML = '<p class="text-red-500">Critical Error: Failed to initialize Firebase. Check console for details.</p>';
+            }
+        }
+
+        window.onload = initializeAndCheckAuth;
+    </script>
+</body>
+</html>

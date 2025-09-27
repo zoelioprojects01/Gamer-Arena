@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register for Tournament</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Setup for Inter font and dark mode aesthetics */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: #161b22;
+        }
+        .form-card {
+            background-color: #161b22;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+        input[type="text"], input[type="tel"] {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            border-radius: 8px;
+            padding: 10px 15px;
+            width: 100%;
+        }
+        input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header shadow-lg p-4 md:p-6 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-extrabold text-blue-400">Tournament Registration</h1>
+            <nav class="flex space-x-4 items-center">
+                <a href="dashboard.html" class="text-gray-400 hover:text-blue-400 transition text-sm md:text-base">Dashboard</a>
+                <button id="logout-button" class="bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded-lg transition duration-200 text-xs md:text-sm">Logout</button>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Loading/Status Container -->
+    <div id="status-container" class="text-center mt-12 max-w-lg mx-auto p-4">
+        <div id="loading-state" class="text-center">
+            <div class="animate-spin h-8 w-8 border-4 border-gray-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p>Loading form...</p>
+        </div>
+        <div id="user-info" class="text-gray-400 text-sm mt-4 hidden"></div>
+        <div id="message-box" class="p-4 mt-4 rounded-lg hidden font-semibold"></div>
+    </div>
+
+    <!-- Registration Form (Hidden until authenticated) -->
+    <main id="content" class="max-w-xl mx-auto p-4 md:p-8 hidden">
+        <div class="form-card p-6 md:p-10 rounded-xl">
+            <h2 id="form-header" class="text-3xl font-bold mb-4 text-white text-center">Register for Tournament</h2>
+            <p class="text-gray-400 mb-6 text-center">Fill in your details below to secure your slot.</p>
+
+            <form id="registration-form" class="space-y-5">
+                
+                <!-- In-Game Name -->
+                <div>
+                    <label for="ign" class="block text-sm font-medium mb-1 text-gray-300">In-Game Name (IGN)</label>
+                    <input type="text" id="ign" name="ign" placeholder="Example: SoloKiller" required>
+                </div>
+                
+                <!-- In-Game ID -->
+                <div>
+                    <label for="in_game_id" class="block text-sm font-medium mb-1 text-gray-300">In-Game User ID</label>
+                    <input type="text" id="in_game_id" name="in_game_id" placeholder="Example: 123456789 (Copy from your game profile)" required>
+                </div>
+                
+                <!-- Mobile Number -->
+                <div>
+                    <label for="mobile_number" class="block text-sm font-medium mb-1 text-gray-300">Mobile Number (WhatsApp Preferred)</label>
+                    <input type="tel" id="mobile_number" name="mobile_number" placeholder="Must be 10 digits" pattern="[0-9]{10}" maxlength="10" required>
+                </div>
+                
+                <!-- Hidden fields for tournament data -->
+                <input type="hidden" id="tournament_game" name="tournament_game">
+                <input type="hidden" id="tournament_id" name="tournament_id">
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-200 mt-6 shadow-lg shadow-blue-900/50">
+                    Submit Registration
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Firebase SDK Imports and Logic for Authentication and Firestore -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setLogLevel, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Setting Firebase log level to Debug
+        setLogLevel('Debug');
+
+        // Global variables provided by the Canvas environment (MANDATORY USE)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        
+        let app;
+        let auth;
+        let db;
+        let userId = null;
+        let userEmail = null;
+
+        const loadingState = document.getElementById('loading-state');
+        const content = document.getElementById('content');
+        const logoutButton = document.getElementById('logout-button');
+        const formHeader = document.getElementById('form-header');
+        const form = document.getElementById('registration-form');
+        const submitButton = document.getElementById('submit-button');
+        const messageBox = document.getElementById('message-box');
+        const userInfoDiv = document.getElementById('user-info');
+
+        const params = new URLSearchParams(window.location.search);
+        const game = params.get('game');
+        const tournamentId = params.get('id');
+
+        // --- Utility Functions ---
+
+        /** Shows a message in the message box */
+        function showMessage(text, isError = false) {
+            messageBox.textContent = text;
+            messageBox.classList.remove('hidden', 'bg-red-900/50', 'bg-green-900/50');
+            messageBox.classList.add(isError ? 'bg-red-900/50 text-red-300' : 'bg-green-900/50 text-green-300');
+        }
+
+        /** Parses URL parameters and updates the form header */
+        function updateUIForTournament() {
+            if (!game || !tournamentId) {
+                formHeader.textContent = "Error: Tournament Not Specified";
+                showMessage("The tournament details are missing. Please register from the tournament list page.", true);
+                content.classList.remove('hidden');
+                loadingState.classList.add('hidden');
+                submitButton.disabled = true;
+                return;
+            }
+
+            const gameName = game.toUpperCase() === 'FF' ? 'Free Fire' : 'BGMI';
+            formHeader.textContent = `Register for ${gameName} (${tournamentId})`;
+            
+            // Set hidden fields
+            document.getElementById('tournament_game').value = game;
+            document.getElementById('tournament_id').value = tournamentId;
+        }
+
+        // --- Firebase Functions ---
+
+        /** Submits the registration data to Firestore */
+        async function handleRegistration(e) {
+            e.preventDefault();
+            
+            if (!userId) {
+                showMessage("Authentication failed. Please log out and log back in.", true);
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = "Processing...";
+            messageBox.classList.add('hidden');
+
+            const formData = new FormData(form);
+            const registrationData = {
+                registered_by_uid: userId,
+                registered_by_email: userEmail,
+                ign: formData.get('ign'),
+                in_game_id: formData.get('in_game_id'),
+                mobile_number: formData.get('mobile_number'),
+                tournament_game: formData.get('tournament_game'),
+                tournament_id: formData.get('tournament_id'),
+                timestamp: new Date().toISOString(),
+            };
+
+            const collectionPath = `artifacts/${appId}/public/data/registrations`;
+            
+            // Use a unique document ID combining user ID and tournament ID to prevent duplicate submissions
+            const docId = `${userId}-${registrationData.tournament_game}-${registrationData.tournament_id}`;
+            const docRef = doc(db, collectionPath, docId);
+
+            try {
+                // Check if already registered
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    showMessage("You are already registered for this tournament!", true);
+                    submitButton.textContent = "Already Registered";
+                    return;
+                }
+
+                // Save new registration
+                await setDoc(docRef, registrationData);
+                showMessage("✅ Registration Successful! You will receive further details on your registered mobile number/email.", false);
+                form.reset(); // Clear the form on success
+
+            } catch (error) {
+                console.error("Firestore Registration Error:", error);
+                showMessage(`Registration failed: ${error.message}. Please check your internet connection.`, true);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = "Submit Registration";
+            }
+        }
+
+
+        /**
+         * Initializes Firebase and checks authentication state.
+         */
+        async function initializeAndCheckAuth() {
+            if (!firebaseConfig) {
+                showMessage("Firebase config is missing. Cannot initialize Firebase.", true);
+                return;
+            }
+
+            try {
+                // Initialize Firebase
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Initial Firebase sign-in check
+                onAuthStateChanged(auth, async (user) => {
+                    loadingState.classList.add('hidden');
+                    if (user) {
+                        userId = user.uid;
+                        userEmail = user.email || 'N/A';
+                        console.log("User signed in with UID:", userId);
+                        
+                        userInfoDiv.textContent = `Logged in as: ${userEmail} (UID: ${userId.substring(0, 8)}...)`;
+                        userInfoDiv.classList.remove('hidden');
+
+                        updateUIForTournament();
+                        content.classList.remove('hidden');
+                        
+                    } else {
+                        // User is not authenticated, redirect to login page
+                        console.log("User signed out. Redirecting to login.");
+                        window.location.href = 'index.html';
+                    }
+                });
+
+                // Handle Logout
+                logoutButton.addEventListener('click', async () => {
+                    try {
+                        console.log("Attempting to sign out user...");
+                        await signOut(auth);
+                        // Redirection happens via onAuthStateChanged listener
+                    } catch (error) {
+                        console.error("Logout Error:", error);
+                    }
+                });
+                
+                // Attach form listener
+                form.addEventListener('submit', handleRegistration);
+
+            } catch (e) {
+                console.error("Firebase Initialization Failed:", e);
+                showMessage("Critical Error: Failed to initialize Firebase. Check console for details.", true);
+            }
+        }
+
+        window.onload = initializeAndCheckAuth;
+    </script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizer Dashboard | Players</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Setup for Inter font and dark mode aesthetics */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: #161b22;
+        }
+        .data-card {
+            background-color: #161b22;
+        }
+        .data-row:hover {
+            background-color: #1f232a;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Header -->
+    <header class="header shadow-lg p-4 md:p-6 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-extrabold text-yellow-400">ORGANIZER DASHBOARD</h1>
+            <nav class="flex space-x-4 items-center">
+                <a href="dashboard.html" class="text-gray-400 hover:text-yellow-400 transition text-sm md:text-base">Home</a>
+                <button id="logout-button" class="bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded-lg transition duration-200 text-xs md:text-sm">Logout</button>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Status Container -->
+    <div id="status-container" class="text-center mt-12 max-w-lg mx-auto p-4">
+        <div id="loading-state" class="text-center">
+            <div class="animate-spin h-8 w-8 border-4 border-gray-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p>Verifying authentication...</p>
+        </div>
+        <div id="message-box" class="p-4 mt-4 rounded-lg hidden font-semibold"></div>
+    </div>
+
+    <!-- Organizer Password Gate (Appears after Firebase Auth) -->
+    <main id="password-gate" class="max-w-md mx-auto p-4 md:p-8 hidden">
+        <div class="data-card p-8 rounded-xl shadow-lg border-t-4 border-yellow-500">
+            <h2 class="text-2xl font-bold mb-4 text-white text-center">Admin Access Required</h2>
+            <p class="text-gray-400 mb-6 text-center">Enter the organizer password to view player data.</p>
+            <form id="password-form" class="space-y-4">
+                <input type="password" id="admin-password" placeholder="Enter Organizer Password" class="w-full bg-[#21262d] border border-[#30363d] text-white p-3 rounded-lg focus:ring-yellow-500 focus:border-yellow-500" required>
+                <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-700 text-gray-900 font-bold py-3 rounded-lg transition duration-200">
+                    Gain Access
+                </button>
+            </form>
+            <p class="text-xs text-red-400 mt-4 text-center">
+                WARNING: This password is client-side protected only and can be viewed in the source code.
+            </p>
+        </div>
+    </main>
+
+    <!-- Admin Content (Hidden until password entered) -->
+    <div id="admin-content" class="max-w-7xl mx-auto p-4 md:p-8 hidden">
+        <h2 class="text-3xl font-bold mb-6 text-white border-b border-gray-700 pb-3">All Registered Players (Real-time)</h2>
+        
+        <div class="flex justify-between items-center mb-6">
+            <p class="text-gray-400"><span class="font-bold text-lg text-yellow-400" id="total-players">0</span> Total Registrations</p>
+            <button id="add-player-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 shadow-md">
+                + Manually Add Registration
+            </button>
+        </div>
+
+        <!-- Player List Table/Grid -->
+        <div class="overflow-x-auto rounded-lg shadow-xl border border-gray-700">
+            <table class="min-w-full divide-y divide-gray-700">
+                <thead class="bg-gray-800">
+                    <tr>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">IGN / ID</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Mobile</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Tournament</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Registered By (UID)</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="players-table-body" class="bg-gray-900 divide-y divide-gray-700">
+                    <!-- Player rows will be injected here by JavaScript -->
+                    <tr id="no-players-row"><td colspan="5" class="px-3 py-4 text-center text-gray-500">No players registered yet.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal for Adding Player (Hidden by default) -->
+    <div id="add-player-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="data-card p-6 rounded-xl w-full max-w-lg">
+            <h3 class="text-2xl font-bold mb-4 text-white">Manual Registration</h3>
+            <form id="manual-registration-form" class="space-y-4">
+                <input type="text" name="m_ign" placeholder="In-Game Name (IGN)" required>
+                <input type="text" name="m_in_game_id" placeholder="In-Game User ID" required>
+                <input type="tel" name="m_mobile_number" placeholder="Mobile Number (10 digits)" pattern="[0-9]{10}" maxlength="10" required>
+                <select name="m_game" class="w-full bg-[#21262d] border border-[#30363d] text-white p-3 rounded-lg focus:ring-blue-500 focus:border-blue-500" required>
+                    <option value="">Select Game</option>
+                    <option value="ff">Free Fire</option>
+                    <option value="bgmi">BGMI</option>
+                </select>
+                <input type="text" name="m_tournament_id" placeholder="Tournament ID (e.g., squad-1)" required>
+
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" id="close-modal-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg">Cancel</button>
+                    <button type="submit" id="manual-submit-btn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg">Add Player</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Imports and Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, setLogLevel, doc, setDoc, deleteDoc, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Setting Firebase log level to Debug
+        setLogLevel('Debug');
+
+        // Global variables provided by the Canvas environment (MANDATORY USE)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        
+        // !!! SECURITY WARNING: Hardcoded password for client-side protection only !!!
+        const ORGANIZER_PASSWORD = "Utk@911_S"; 
+        
+        let app;
+        let auth;
+        let db;
+        let userId = null;
+        let isOrganizer = false;
+
+        const loadingState = document.getElementById('loading-state');
+        const passwordGate = document.getElementById('password-gate');
+        const adminContent = document.getElementById('admin-content');
+        const logoutButton = document.getElementById('logout-button');
+        const passwordForm = document.getElementById('password-form');
+        const playersTableBody = document.getElementById('players-table-body');
+        const totalPlayersSpan = document.getElementById('total-players');
+        const messageBox = document.getElementById('message-box');
+        const addPlayerBtn = document.getElementById('add-player-btn');
+        const addPlayerModal = document.getElementById('add-player-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const manualRegistrationForm = document.getElementById('manual-registration-form');
+
+        // --- Utility Functions ---
+
+        /** Shows a message in the message box */
+        function showMessage(text, isError = false) {
+            messageBox.textContent = text;
+            messageBox.classList.remove('hidden', 'bg-red-900/50', 'bg-green-900/50');
+            messageBox.classList.add(isError ? 'bg-red-900/50 text-red-300' : 'bg-green-900/50 text-green-300');
+            setTimeout(() => messageBox.classList.add('hidden'), 5000);
+        }
+
+        // --- Core Admin Logic ---
+
+        /** Renders the player data into the table */
+        function renderPlayers(players) {
+            playersTableBody.innerHTML = '';
+            totalPlayersSpan.textContent = players.length;
+
+            if (players.length === 0) {
+                playersTableBody.innerHTML = '<tr id="no-players-row"><td colspan="5" class="px-3 py-4 text-center text-gray-500">No players registered yet.</td></tr>';
+                return;
+            }
+
+            players.forEach(player => {
+                const tr = document.createElement('tr');
+                tr.classList.add('data-row');
+                tr.innerHTML = `
+                    <td class="px-3 py-3 text-sm font-medium text-white">
+                        <span class="block">${player.ign}</span>
+                        <span class="text-xs text-gray-400">${player.in_game_id}</span>
+                    </td>
+                    <td class="px-3 py-3 text-sm text-gray-400">${player.mobile_number}</td>
+                    <td class="px-3 py-3 text-sm text-gray-400">
+                        <span class="font-semibold uppercase text-yellow-400">${player.tournament_game}</span>
+                        <span class="block text-xs text-gray-500">${player.tournament_id}</span>
+                    </td>
+                    <td class="px-3 py-3 text-xs text-gray-500">
+                        <span class="block">${player.registered_by_email}</span>
+                        <span class="block text-xs font-mono">${player.registered_by_uid.substring(0, 10)}...</span>
+                    </td>
+                    <td class="px-3 py-3 whitespace-nowrap text-sm font-medium">
+                        <button data-doc-id="${player.docId}" class="delete-btn bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded-md transition duration-150 text-xs">
+                            Remove/Ban
+                        </button>
+                    </td>
+                `;
+                playersTableBody.appendChild(tr);
+            });
+            
+            // Re-attach delete listeners
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', handleDeleteRegistration);
+            });
+        }
+        
+        /** Starts the real-time listener for the registrations collection */
+        function startRealtimeListener() {
+            const collectionPath = `artifacts/${appId}/public/data/registrations`;
+            const q = query(collection(db, collectionPath));
+            
+            // onSnapshot provides real-time updates
+            onSnapshot(q, (snapshot) => {
+                const players = [];
+                snapshot.forEach((doc) => {
+                    players.push({ docId: doc.id, ...doc.data() });
+                });
+                renderPlayers(players);
+                console.log(`Real-time update: ${players.length} registrations loaded.`);
+            }, (error) => {
+                console.error("Firestore Listener Error:", error);
+                showMessage("Failed to load player list in real-time.", true);
+            });
+        }
+        
+        /** Deletes a registration document */
+        async function handleDeleteRegistration(e) {
+            const docId = e.currentTarget.dataset.docId;
+            if (!docId) return;
+
+            // Using a custom modal/confirm box would be better, but for simplicity, we use a simple JS confirm
+            if (!confirm(`Are you sure you want to remove registration ${docId}? This action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                const collectionPath = `artifacts/${appId}/public/data/registrations`;
+                await deleteDoc(doc(db, collectionPath, docId));
+                showMessage("Registration successfully removed.", false);
+            } catch (error) {
+                console.error("Delete Error:", error);
+                showMessage(`Failed to remove registration: ${error.message}`, true);
+            }
+        }
+
+        /** Handles manual registration via the modal form */
+        async function handleManualRegistration(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const submitBtn = document.getElementById('manual-submit-btn');
+
+            const newRegistration = {
+                registered_by_uid: userId, // Organizer's UID
+                registered_by_email: 'ORGANIZER_MANUAL_ENTRY',
+                ign: formData.get('m_ign'),
+                in_game_id: formData.get('m_in_game_id'),
+                mobile_number: formData.get('m_mobile_number'),
+                tournament_game: formData.get('m_game'),
+                tournament_id: formData.get('m_tournament_id'),
+                timestamp: new Date().toISOString(),
+            };
+            
+            if (newRegistration.mobile_number.length !== 10) {
+                showMessage("Mobile number must be 10 digits.", true);
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Adding...";
+
+            try {
+                const collectionPath = `artifacts/${appId}/public/data/registrations`;
+                // Create a generic unique ID for manual entries
+                const docId = `MANUAL-${Date.now()}`;
+                
+                await setDoc(doc(db, collectionPath, docId), newRegistration);
+                showMessage("Player manually registered successfully!", false);
+                form.reset();
+                addPlayerModal.classList.add('hidden'); // Close modal
+
+            } catch (error) {
+                console.error("Manual Registration Error:", error);
+                showMessage(`Manual registration failed: ${error.message}`, true);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Add Player";
+            }
+        }
+
+
+        // --- Authentication and Initialization ---
+
+        /** Handles the organizer password check */
+        function handlePasswordSubmit(e) {
+            e.preventDefault();
+            const enteredPassword = document.getElementById('admin-password').value;
+            
+            if (enteredPassword === ORGANIZER_PASSWORD) {
+                showMessage("Access granted! Loading player data...", false);
+                passwordGate.classList.add('hidden');
+                adminContent.classList.remove('hidden');
+                isOrganizer = true;
+                startRealtimeListener(); // Start fetching and displaying data
+            } else {
+                showMessage("Incorrect password.", true);
+            }
+        }
+
+        /** Initializes Firebase and checks authentication state. */
+        async function initializeAndCheckAuth() {
+            if (!firebaseConfig) {
+                showMessage("Firebase config is missing. Cannot initialize Firebase.", true);
+                return;
+            }
+
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Initial Firebase sign-in check
+                onAuthStateChanged(auth, async (user) => {
+                    loadingState.classList.add('hidden');
+                    if (user) {
+                        userId = user.uid;
+                        // Display password gate if user is logged in
+                        passwordGate.classList.remove('hidden');
+                    } else {
+                        // Not logged in, redirect to login page
+                        console.log("User signed out. Redirecting to login.");
+                        window.location.href = 'index.html';
+                    }
+                });
+
+                // --- Event Listeners ---
+                logoutButton.addEventListener('click', async () => {
+                    try {
+                        console.log("Attempting to sign out user...");
+                        await signOut(auth);
+                    } catch (error) {
+                        console.error("Logout Error:", error);
+                    }
+                });
+                
+                passwordForm.addEventListener('submit', handlePasswordSubmit);
+                addPlayerBtn.addEventListener('click', () => addPlayerModal.classList.remove('hidden'));
+                closeModalBtn.addEventListener('click', () => addPlayerModal.classList.add('hidden'));
+                manualRegistrationForm.addEventListener('submit', handleManualRegistration);
+
+
+            } catch (e) {
+                console.error("Firebase Initialization Failed:", e);
+                showMessage("Critical Error: Failed to initialize Firebase. Check console for details.", true);
+            }
+        }
+
+        window.onload = initializeAndCheckAuth;
+    </script>
+</body>
+</html>
