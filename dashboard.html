@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Dashboard</title>
+    <title>Gamer Arena Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Setup for Inter font and dark mode aesthetics */
@@ -18,14 +18,18 @@
             background-color: #161b22;
         }
         .game-card {
-            background-color: #161b22;
             transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            background-color: #161b22;
         }
         .game-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        .ff-card {
+            border-bottom: 5px solid #10b981; /* Green accent for Free Fire */
+        }
+        .bgmi-card {
+            border-bottom: 5px solid #3b82f6; /* Blue accent for BGMI */
         }
     </style>
 </head>
@@ -33,141 +37,120 @@
     <!-- Navigation Header -->
     <header class="header shadow-lg p-4 md:p-6 sticky top-0 z-10">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl md:text-2xl font-extrabold text-green-400">Gamer Arena <span class="text-sm text-gray-500 font-normal ml-2 hidden sm:inline-block">Dashboard</span></h1>
-            <nav class="flex space-x-4 md:space-x-6 items-center">
-                <a href="completed_matches.html" class="text-gray-400 hover:text-green-400 transition">Completed Matches</a>
-                <button id="logout-button" class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 text-sm">Logout</button>
+            <h1 class="text-xl md:text-2xl font-extrabold text-white">Select Arena</h1>
+            <nav class="flex space-x-4 items-center">
+                <a href="completed_matches.html" class="text-gray-400 hover:text-white transition text-sm md:text-base">Completed Matches</a>
+                <button id="logout-button" class="bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded-lg transition duration-200 text-xs md:text-sm">Logout</button>
             </nav>
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="max-w-5xl mx-auto p-4 md:p-8">
-        
-        <!-- Loading State Indicator -->
-        <div id="loading-state" class="text-center mt-12">
-            <div class="animate-spin h-8 w-8 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p>Checking authentication and loading dashboard...</p>
-        </div>
+    <!-- Loading State Indicator -->
+    <div id="loading-state" class="text-center mt-12">
+        <div class="animate-spin h-8 w-8 border-4 border-gray-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p>Verifying user authentication...</p>
+    </div>
 
-        <!-- Dashboard Content (Hidden until authenticated) -->
-        <div id="content" class="hidden">
-            <h2 class="text-4xl font-bold mb-8 text-center pt-6">Select Your Battleground</h2>
-            <p class="text-center text-gray-400 mb-10">Choose the game to view the ongoing tournaments and register.</p>
+    <!-- Main Content Area (Hidden until authenticated) -->
+    <main id="content" class="max-w-4xl mx-auto p-4 md:p-8 hidden">
+        <h2 class="text-4xl font-bold mb-4 text-center text-white pt-6">Choose Your Game</h2>
+        <p class="text-center text-gray-400 mb-12">Access live and upcoming tournaments for your favorite battle royale game.</p>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
-                <!-- Free Fire Card -->
-                <a href="tournaments_ff.html" class="game-card p-6 md:p-10 rounded-xl border border-green-500/30 text-center flex flex-col items-center">
-                    <img src="https://placehold.co/100x100/FF5733/FFFFFF?text=FF" onerror="this.onerror=null;this.src='https://placehold.co/100x100/FF5733/FFFFFF?text=Free+Fire';" class="w-24 h-24 rounded-full mb-4 shadow-lg">
-                    <h3 class="text-2xl font-bold text-green-400 mb-2">Free Fire (FF)</h3>
-                    <p class="text-gray-400">Survival, fast-paced action, and intense battle royale.</p>
-                    <div class="mt-4 inline-flex items-center text-sm font-medium text-green-400 hover:text-green-300">
-                        View Tournaments
-                        <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </div>
-                </a>
-
-                <!-- BGMI Card -->
-                <a href="tournaments_bgmi.html" class="game-card p-6 md:p-10 rounded-xl border border-blue-500/30 text-center flex flex-col items-center">
-                    <img src="https://placehold.co/100x100/4B77BE/FFFFFF?text=BGMI" onerror="this.onerror=null;this.src='https://placehold.co/100x100/4B77BE/FFFFFF?text=BGMI';" class="w-24 h-24 rounded-full mb-4 shadow-lg">
-                    <h3 class="text-2xl font-bold text-blue-400 mb-2">BGMI (Battlegrounds Mobile India)</h3>
-                    <p class="text-gray-400">Tactical shooting, classic maps, and competitive esports.</p>
-                    <div class="mt-4 inline-flex items-center text-sm font-medium text-blue-400 hover:text-blue-300">
-                        View Tournaments
-                        <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </div>
-                </a>
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             
-            <!-- User ID Display for Debug/Sharing (MANDATORY for multi-user apps) -->
-            <section class="mt-16 bg-gray-800/20 p-6 md:p-8 rounded-xl border border-gray-700">
-                <h3 class="text-xl font-semibold mb-2 text-center">Your Account Details</h3>
-                <div class="text-center mt-4">
-                    <span class="text-xs text-gray-500 block mb-1">Authenticated User ID (UID): </span>
-                    <span id="user-id-display" class="text-sm font-mono bg-gray-700 px-3 py-1 rounded-lg break-all text-yellow-300">Loading...</span>
-                    <p class="text-xs text-gray-500 mt-2">This is your unique identifier for tournament registration.</p>
-                </div>
-            </section>
+            <!-- Free Fire Card -->
+            <a href="tournaments_ff.html" class="game-card ff-card p-6 rounded-xl shadow-lg text-center flex flex-col items-center hover:shadow-green-700/50">
+                <img src="assets/free_fire_logo.png" alt="Free Fire Logo" 
+                     onerror="this.onerror=null; this.src='https://placehold.co/100x100/10b981/ffffff?text=FF+LOGO';" 
+                     class="w-24 h-24 mb-4 rounded-full border-4 border-green-500">
+                <h3 class="text-3xl font-extrabold text-green-400 mb-2">FREE FIRE</h3>
+                <p class="text-gray-400">Jump into the fastest battle royale action!</p>
+                <div class="mt-4 text-sm font-semibold text-white bg-green-600 px-4 py-1 rounded-full">View Tournaments</div>
+            </a>
+
+            <!-- BGMI Card -->
+            <a href="tournaments_bgmi.html" class="game-card bgmi-card p-6 rounded-xl shadow-lg text-center flex flex-col items-center hover:shadow-blue-700/50">
+                <img src="assets/bgmi_logo.png" alt="BGMI Logo" 
+                     onerror="this.onerror=null; this.src='https://placehold.co/100x100/3b82f6/ffffff?text=BGMI+LOGO';" 
+                     class="w-24 h-24 mb-4 rounded-full border-4 border-blue-500">
+                <h3 class="text-3xl font-extrabold text-blue-400 mb-2">B.G.M.I</h3>
+                <p class="text-gray-400">India's Battlegrounds Mobile awaits your squad!</p>
+                <div class="mt-4 text-sm font-semibold text-white bg-blue-600 px-4 py-1 rounded-full">View Tournaments</div>
+            </a>
+        </div>
+        
+        <!-- Quick Access Link for Organizer -->
+        <div class="text-center mt-12">
+            <a href="registered_players.html" class="text-sm text-gray-500 hover:text-yellow-400 underline">Organizer Admin Access</a>
         </div>
     </main>
 
     <!-- Firebase SDK Imports and Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // Setting Firebase log level to Debug
         setLogLevel('Debug');
 
-        // Global variables provided by the Canvas environment (MANDATORY USE)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
+        // --- HARDCODED FIREBASE CONFIGURATION ---
+        // This is necessary for GitHub Pages to work without environment variables.
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7Ln4FWjEOs5K-ggRVsvVRR3XqVMiWRs4",
+            authDomain: "tournament-app-62b78.firebaseapp.com",
+            projectId: "tournament-app-62b78",
+            storageBucket: "tournament-app-62b78.firebasestorage.app",
+            messagingSenderId: "847639195339",
+            appId: "1:847639195339:web:dc0511c1c8c5d907e9354e",
+            measurementId: "G-MQJVKDMXWE"
+        };
+        
         let app;
         let auth;
-        let db;
         
         const loadingState = document.getElementById('loading-state');
         const content = document.getElementById('content');
-        const userIdDisplay = document.getElementById('user-id-display');
         const logoutButton = document.getElementById('logout-button');
 
-        /**
-         * Initializes Firebase and checks authentication state.
-         */
-        async function initializeAndCheckAuth() {
-            if (!firebaseConfig) {
-                console.error("Firebase config is missing. Cannot initialize Firebase.");
-                loadingState.innerHTML = '<p class="text-red-500">Error: Firebase configuration is missing.</p>';
+        /** Initializes Firebase and checks authentication state. */
+        function initializeAndCheckAuth() {
+            if (!firebaseConfig.apiKey) {
+                console.error("Firebase config is missing.");
+                window.location.href = 'index.html';
                 return;
             }
 
             try {
-                // Initialize Firebase
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
-                db = getFirestore(app);
 
-                // Check auth state in real-time
-                onAuthStateChanged(auth, async (user) => {
+                // Listener checks if a user is logged in
+                onAuthStateChanged(auth, (user) => {
+                    loadingState.classList.add('hidden');
                     if (user) {
-                        // User is authenticated
-                        const currentUserId = user.uid;
-                        console.log("User signed in. UID:", currentUserId);
-                        userIdDisplay.textContent = currentUserId;
-                        loadingState.classList.add('hidden');
+                        console.log("User is authenticated. Displaying dashboard.");
                         content.classList.remove('hidden');
-
                     } else {
-                        // User is not authenticated, redirect to login page
-                        console.log("User signed out. Redirecting to login.");
-                        
-                        // Check if we are on the dashboard page, if so, redirect.
-                        if (window.location.pathname.includes('dashboard.html')) {
-                            window.location.href = 'index.html';
-                        }
+                        console.log("User is NOT authenticated. Redirecting to login.");
+                        window.location.href = 'index.html'; // Redirect to login if not authenticated
                     }
                 });
 
-                // Handle Logout
+                // Logout Event Listener
                 logoutButton.addEventListener('click', async () => {
                     try {
-                        console.log("Attempting to sign out user...");
                         await signOut(auth);
-                        // The onAuthStateChanged listener handles the redirection to index.html after successful sign out
+                        // Redirection happens via the onAuthStateChanged listener
                     } catch (error) {
                         console.error("Logout Error:", error);
-                        // In case of an error, manually redirect as a fallback
-                        window.location.href = 'index.html'; 
                     }
                 });
 
             } catch (e) {
                 console.error("Firebase Initialization Failed:", e);
-                loadingState.innerHTML = '<p class="text-red-500">Critical Error: Failed to initialize Firebase. Check console for details.</p>';
+                // Fallback: critical error, redirect to login page for clarity
+                loadingState.innerHTML = '<p class="text-red-500">Critical Error. Please check console.</p>';
+                setTimeout(() => window.location.href = 'index.html', 3000);
             }
         }
 
