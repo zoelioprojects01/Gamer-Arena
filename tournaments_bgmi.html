@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Setup for Inter font and dark mode aesthetics */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        @import url('https://fonts.com/css2?family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0d1117;
@@ -36,17 +36,7 @@
     <!-- Navigation Header -->
     <header class="header shadow-lg p-4 md:p-6 sticky top-0 z-10">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <!-- Include BGMI Logo -->
-            <div class="flex items-center space-x-3">
-                <img 
-                    src="assets/bgmi_logo.png" 
-                    alt="BGMI Logo" 
-                    class="w-8 h-8 rounded-full"
-                    onerror="this.onerror=null; this.src='https://placehold.co/32x32/3b82f6/FFFFFF?text=BGMI';"
-                >
-                <h1 class="text-xl md:text-2xl font-extrabold text-blue-400">BGMI Arena</h1>
-            </div>
-            
+            <h1 class="text-xl md:text-2xl font-extrabold text-blue-400">BGMI Arena</h1>
             <nav class="flex space-x-4 items-center">
                 <a href="dashboard.html" class="text-gray-400 hover:text-blue-400 transition text-sm md:text-base">Dashboard</a>
                 <a href="completed_matches.html" class="text-gray-400 hover:text-blue-400 transition text-sm md:text-base">Completed</a>
@@ -64,7 +54,7 @@
     <!-- Main Content Area (Hidden until authenticated) -->
     <main id="content" class="max-w-6xl mx-auto p-4 md:p-8 hidden">
         <h2 class="text-4xl font-bold mb-4 text-center text-blue-400 pt-6">Ongoing BGMI Tournaments</h2>
-        <p class="text-center text-gray-400 mb-8">Secure your spot in the battlegrounds! All times are in IST.</p>
+        <p class="text-center text-gray-400 mb-8">Register now before the slots run out! All times are in IST.</p>
         
         <!-- Instruction Note for Organizers (As requested) -->
         <div class="update-note p-4 rounded-xl mb-10 border border-blue-700/50">
@@ -75,110 +65,119 @@
             </p>
         </div>
 
-        <!-- Tournament List Container -->
-        <div class="space-y-8" id="tournament-list">
+        <!-- Tournament List -->
+        <div class="space-y-6" id="tournament-list">
             
-            <!-- Tournament Card 1: BGMI Squad Masters (Manually added data) -->
-            <div class="tournament-card p-6 rounded-xl shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center">
+            <!-- Tournament Card 1: BGMI Squad TDM Blitz (Manually added data) -->
+            <div class="tournament-card p-6 rounded-xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center">
                 <div class="flex-grow">
-                    <h3 class="text-2xl font-bold text-white mb-2">BGMI Erangel Pro Scrims</h3>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <img src="assets/bgmi_logo.png" alt="BGMI Logo" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/40x40/3b82f6/ffffff?text=B';" 
+                             class="w-8 h-8 rounded-full">
+                        <h3 class="text-2xl font-bold text-white">BGMI Squad War Zone</h3>
+                    </div>
                     <p class="text-sm text-gray-400 mb-2">
                         <span class="font-semibold text-blue-300">Type:</span> Squad | 
-                        <span class="font-semibold text-blue-300">Map:</span> Erangel (Classic) | 
-                        <span class="font-semibold text-blue-300">Slots:</span> 18/25
+                        <span class="font-semibold text-blue-300">Map:</span> Erangel | 
+                        <span class="font-semibold text-blue-300">Slots:</span> 20/25 Teams
                     </p>
-                    <p class="text-xl font-extrabold text-yellow-400 mt-2">Prize Pool: ₹25,000 INR</p>
+                    <p class="text-xl font-extrabold text-yellow-400 mt-2">Prize Pool: ₹35,000 INR</p>
                 </div>
-                <div class="flex flex-col md:items-end mt-4 md:mt-0 space-y-2 w-full md:w-auto">
-                    <p class="text-lg font-semibold text-gray-200">Date: <span class="text-blue-400">01 Oct, 2025</span></p>
-                    <p class="text-lg font-semibold text-gray-200">Time: <span class="text-blue-400">8:30 PM IST</span></p>
-                    <a href="register_tournament.html?game=bgmi&id=squad-1" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200 shadow-md shadow-blue-900/50 text-center">
+                <div class="flex flex-col md:items-end mt-4 md:mt-0">
+                    <p class="text-lg font-semibold text-gray-200">Date: 3rd Nov, 2025</p>
+                    <p class="text-sm text-red-400 mb-4">Registration Closes: 2nd Nov, 9:00 PM</p>
+                    <a href="register_tournament.html?game=bgmi&id=bgmi-squad-warzone" 
+                       class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200 text-center w-full md:w-auto">
                         Register Now
                     </a>
                 </div>
             </div>
 
-            <!-- Tournament Card 2: BGMI Solo TDM (Manually added data) -->
-            <div class="tournament-card p-6 rounded-xl shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center">
+            <!-- Tournament Card 2: BGMI Duo Rush -->
+            <div class="tournament-card p-6 rounded-xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center">
                 <div class="flex-grow">
-                    <h3 class="text-2xl font-bold text-white mb-2">Solo TDM Rush Hour</h3>
+                    <div class="flex items-center space-x-4 mb-2">
+                        <img src="assets/bgmi_logo.png" alt="BGMI Logo" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/40x40/3b82f6/ffffff?text=B';" 
+                             class="w-8 h-8 rounded-full">
+                        <h3 class="text-2xl font-bold text-white">BGMI Duo Rush</h3>
+                    </div>
                     <p class="text-sm text-gray-400 mb-2">
-                        <span class="font-semibold text-blue-300">Type:</span> Solo (TDM) | 
-                        <span class="font-semibold text-blue-300">Map:</span> Warehouse | 
-                        <span class="font-semibold text-blue-300">Slots:</span> 35/50
+                        <span class="font-semibold text-blue-300">Type:</span> Duo | 
+                        <span class="font-semibold text-blue-300">Map:</span> Livik | 
+                        <span class="font-semibold text-blue-300">Slots:</span> 45/60 Teams
                     </p>
-                    <p class="text-xl font-extrabold text-yellow-400 mt-2">Prize Pool: ₹5,000 INR</p>
+                    <p class="text-xl font-extrabold text-yellow-400 mt-2">Prize Pool: ₹12,000 INR</p>
                 </div>
-                <div class="flex flex-col md:items-end mt-4 md:mt-0 space-y-2 w-full md:w-auto">
-                    <p class="text-lg font-semibold text-gray-200">Date: <span class="text-blue-400">03 Oct, 2025</span></p>
-                    <p class="text-lg font-semibold text-gray-200">Time: <span class="text-blue-400">6:00 PM IST</span></p>
-                    <a href="register_tournament.html?game=bgmi&id=solo-tdm-1" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200 shadow-md shadow-blue-900/50 text-center">
+                <div class="flex flex-col md:items-end mt-4 md:mt-0">
+                    <p class="text-lg font-semibold text-gray-200">Date: 20th Nov, 2025</p>
+                    <p class="text-sm text-red-400 mb-4">Registration Closes: 18th Nov, 11:00 PM</p>
+                    <a href="register_tournament.html?game=bgmi&id=bgmi-duo-rush" 
+                       class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition duration-200 text-center w-full md:w-auto">
                         Register Now
                     </a>
                 </div>
             </div>
             
+            <!-- End of Manually Editable Tournament Cards -->
         </div>
     </main>
 
-    <!-- Firebase SDK Imports and Logic for Authentication Check -->
+    <!-- Firebase SDK Imports and Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
-        // Setting Firebase log level to Debug
         setLogLevel('Debug');
 
-        // Global variables provided by the Canvas environment (MANDATORY USE)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        // --- HARDCODED FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7Ln4FWjEOs5K-ggRVsvVRR3XqVMiWRs4",
+            authDomain: "tournament-app-62b78.firebaseapp.com",
+            projectId: "tournament-app-62b78",
+            storageBucket: "tournament-app-62b78.firebasestorage.app",
+            messagingSenderId: "847639195339",
+            appId: "1:847639195339:web:dc0511c1c8c5d907e9354e",
+            measurementId: "G-MQJVKDMXWE"
+        };
         
         let app;
         let auth;
-        let db;
         
         const loadingState = document.getElementById('loading-state');
         const content = document.getElementById('content');
         const logoutButton = document.getElementById('logout-button');
 
-        /**
-         * Initializes Firebase and checks authentication state.
-         */
-        async function initializeAndCheckAuth() {
-            if (!firebaseConfig) {
-                console.error("Firebase config is missing. Cannot initialize Firebase.");
-                loadingState.innerHTML = '<p class="text-red-500">Error: Firebase configuration is missing.</p>';
+        /** Initializes Firebase and checks authentication state. */
+        function initializeAndCheckAuth() {
+            if (!firebaseConfig.apiKey) {
+                console.error("Firebase config is missing.");
+                window.location.href = 'index.html';
                 return;
             }
 
             try {
-                // Initialize Firebase
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
-                db = getFirestore(app);
 
-                // Check auth state in real-time
+                // Listener checks if a user is logged in
                 onAuthStateChanged(auth, (user) => {
+                    loadingState.classList.add('hidden');
                     if (user) {
-                        // User is authenticated
-                        console.log("User signed in. Allowing access to BGMI tournaments.");
-                        loadingState.classList.add('hidden');
+                        console.log("User is authenticated. Displaying BGMI tournaments.");
                         content.classList.remove('hidden');
-
                     } else {
-                        // User is not authenticated, redirect to login page
-                        console.log("User signed out. Redirecting to login.");
-                        window.location.href = 'index.html';
+                        console.log("User is NOT authenticated. Redirecting to login.");
+                        window.location.href = 'index.html'; // Redirect to login if not authenticated
                     }
                 });
 
-                // Handle Logout
+                // Logout Event Listener
                 logoutButton.addEventListener('click', async () => {
                     try {
-                        console.log("Attempting to sign out user...");
                         await signOut(auth);
-                        // Redirection happens via onAuthStateChanged listener
                     } catch (error) {
                         console.error("Logout Error:", error);
                     }
@@ -186,7 +185,8 @@
 
             } catch (e) {
                 console.error("Firebase Initialization Failed:", e);
-                loadingState.innerHTML = '<p class="text-red-500">Critical Error: Failed to initialize Firebase. Check console for details.</p>';
+                loadingState.innerHTML = '<p class="text-red-500">Critical Error. Please check console.</p>';
+                setTimeout(() => window.location.href = 'index.html', 3000);
             }
         }
 
