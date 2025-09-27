@@ -46,12 +46,12 @@
             <div>
                 <label for="login-email" class="block text-sm font-medium mb-1 text-gray-300">Email</label>
                 <input type="email" id="login-email" placeholder="example@email.com" required
-                       class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
+                        class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
             </div>
             <div>
                 <label for="login-password" class="block text-sm font-medium mb-1 text-gray-300">Password</label>
                 <input type="password" id="login-password" placeholder="••••••••" required
-                       class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
+                        class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
             </div>
             <button type="submit" id="login-button"
                     class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md shadow-green-900/50 flex items-center justify-center">
@@ -72,18 +72,18 @@
             <div>
                 <label for="signup-email" class="block text-sm font-medium mb-1 text-gray-300">Email (For Account)</label>
                 <input type="email" id="signup-email" placeholder="example@email.com" required
-                       class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
+                        class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
             </div>
             <div>
                 <label for="signup-mobile" class="block text-sm font-medium mb-1 text-gray-300">Mobile Number</label>
                 <input type="tel" id="signup-mobile" placeholder="Required for tournament contact" required pattern="[0-9]{10}"
-                       class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
+                        class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
                 <p class="text-xs text-gray-500 mt-1">10 digits required (e.g., 9876543210)</p>
             </div>
             <div>
                 <label for="signup-password" class="block text-sm font-medium mb-1 text-gray-300">Password (Min 6 chars)</label>
                 <input type="password" id="signup-password" placeholder="••••••••" required minlength="6"
-                       class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
+                        class="input-field w-full p-3 rounded-lg focus:ring-green-500 focus:border-green-500">
             </div>
             
             <!-- CAPTCHA Placeholder - Must use a service like Google reCAPTCHA in a real deployment -->
@@ -116,9 +116,19 @@
         // Setting Firebase log level to Debug for visibility
         setLogLevel('Debug');
 
-        // Global variables provided by the Canvas environment (MANDATORY USE)
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        // --- HARDCODED FIREBASE CONFIGURATION ---
+        // This MUST match the keys from your Firebase project settings.
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7Ln4FWjEOs5K-ggRVsvVRR3XqVMiWRs4",
+            authDomain: "tournament-app-62b78.firebaseapp.com",
+            projectId: "tournament-app-62b78",
+            storageBucket: "tournament-app-62b78.firebasestorage.app",
+            messagingSenderId: "847639195339",
+            appId: "1:847639195339:web:dc0511c1c8c5d907e9354e",
+            measurementId: "G-MQJVKDMXWE"
+        };
+        // Using a default App ID for GitHub Pages compatibility
+        const appId = firebaseConfig.projectId || 'default-app-id'; 
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         let app;
@@ -126,11 +136,23 @@
         let db;
         let currentUserId = null;
 
+
+        /**
+         * Displays a temporary message in the message box.
+         */
+        function displayMessage(text, styleClass) {
+            const msgBox = document.getElementById('message-box');
+            msgBox.textContent = text;
+            msgBox.className = `p-3 mb-4 rounded-lg text-sm transition-all duration-300 ${styleClass}`;
+            msgBox.classList.remove('hidden');
+        }
+
+
         /**
          * Initializes Firebase and authenticates the user.
          */
         async function initializeAndAuthenticate() {
-            if (!firebaseConfig) {
+            if (!firebaseConfig.apiKey) {
                 console.error("Firebase config is missing. Cannot initialize Firebase.");
                 displayMessage("Configuration Error: Firebase settings are missing. Cannot run app.", 'bg-red-800 text-white');
                 return;
@@ -164,7 +186,6 @@
                             }
                         } catch (e) {
                             console.error("Authentication fallback failed:", e);
-                            displayMessage("Failed to connect to authentication service.", 'bg-red-800 text-white');
                         }
                     }
                 });
@@ -177,9 +198,6 @@
 
         /**
          * Handles user registration (Signup).
-         * @param {string} email - The user's email.
-         * @param {string} password - The user's password.
-         * @param {string} mobile - The user's mobile number.
          */
         async function handleSignup(email, password, mobile) {
             const signupButton = document.getElementById('signup-button');
@@ -204,10 +222,8 @@
                 });
 
                 displayMessage("Signup successful! Redirecting to dashboard...", 'bg-green-600 text-white');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1500);
-
+                // Redirection handled by onAuthStateChanged listener
+                
             } catch (error) {
                 console.error("Signup Error:", error.code, error.message);
                 let message = "Signup failed.";
@@ -226,8 +242,6 @@
 
         /**
          * Handles user login.
-         * @param {string} email - The user's email.
-         * @param {string} password - The user's password.
          */
         async function handleLogin(email, password) {
             const loginButton = document.getElementById('login-button');
@@ -239,12 +253,6 @@
             try {
                 await signInWithEmailAndPassword(auth, email, password);
                 displayMessage("Login successful! Redirecting to dashboard...", 'bg-green-600 text-white');
-                // Redirection is handled by the onAuthStateChanged listener, but we add a small delay for user experience
-                setTimeout(() => {
-                     // We don't actually need this timeout, as onAuthStateChanged handles the redirect, 
-                     // but it provides a smoother visual transition.
-                }, 500);
-
             } catch (error) {
                 console.error("Login Error:", error.code, error.message);
                 let message = "Login failed. Check your email and password.";
@@ -256,18 +264,6 @@
                 loginButton.disabled = false;
                 loginSpinner.classList.add('hidden');
             }
-        }
-
-        /**
-         * Displays a temporary message in the message box.
-         * @param {string} text - The message text.
-         * @param {string} styleClass - Tailwind class for styling (e.g., 'bg-red-800 text-white').
-         */
-        function displayMessage(text, styleClass) {
-            const msgBox = document.getElementById('message-box');
-            msgBox.textContent = text;
-            msgBox.className = `p-3 mb-4 rounded-lg text-sm transition-all duration-300 ${styleClass}`;
-            msgBox.classList.remove('hidden');
         }
 
 
@@ -285,10 +281,12 @@
             toggleSignup.addEventListener('click', () => {
                 loginForm.classList.add('hidden');
                 signupForm.classList.remove('hidden');
+                document.getElementById('message-box').classList.add('hidden'); // Clear message
             });
             toggleLogin.addEventListener('click', () => {
                 signupForm.classList.add('hidden');
                 loginForm.classList.remove('hidden');
+                document.getElementById('message-box').classList.add('hidden'); // Clear message
             });
 
             // Login Submission
