@@ -128,7 +128,16 @@
 
         // Global variables provided by the Canvas environment (MANDATORY USE)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        // HARDCODED CONFIGURATION: Using the keys you provided for debugging connection issues.
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7Ln4FWjEOs5K-ggRVsvVRR3XqVMiWRs4",
+            authDomain: "tournament-app-62b78.firebaseapp.com",
+            projectId: "tournament-app-62b78",
+            storageBucket: "tournament-app-62b78.firebasestorage.app",
+            messagingSenderId: "847639195339",
+            appId: "1:847639195339:web:dc0511c1c8c5d907e9354e",
+            measurementId: "G-MQJVKDMXWE"
+        };
         
         // !!! SECURITY WARNING: Hardcoded password for client-side protection only !!!
         const ORGANIZER_PASSWORD = "Utk@911_S"; 
